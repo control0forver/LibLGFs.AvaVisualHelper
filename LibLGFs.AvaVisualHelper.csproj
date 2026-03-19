@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <RepositoryUrl>https://github.com/control0forver/LibLGFs.AvaVisualHelper</RepositoryUrl>
+    <IncludeSymbols>True</IncludeSymbols>
+    <PackageTags>avalonia</PackageTags>
+    <Authors>TheLGF, LGF-Studio</Authors>
+    <Company>LGF-Studio</Company>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageId>$(AssemblyName).$(Configuration)</PackageId>
+    <Copyright>Copyright (c) 2026 TheLGF, LGF-Studio</Copyright>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.12" />
+    <PackageReference Include="Egolds.Xaml.Behaviors.Interactions.Animated" Version="11.3.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>
