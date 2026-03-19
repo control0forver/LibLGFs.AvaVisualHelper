@@ -14,7 +14,7 @@
     <PackageId>$(AssemblyName).$(Configuration)</PackageId>
     <Copyright>Copyright (c) 2026 TheLGF, LGF-Studio</Copyright>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
