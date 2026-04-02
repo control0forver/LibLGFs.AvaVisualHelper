@@ -7,25 +7,50 @@ using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.VisualTree;
 using Avalonia.Xaml.Interactivity;
-using System.Diagnostics;
 
 namespace LibLGFs.AvaVisualHelper;
 
 public static class ViewHelper
 {
-    public static void ListBox_LayoutUpdated(object? sender, EventArgs e)
-    {
-        if (sender is not ListBox listBox)
-            throw new ArgumentException(null, nameof(sender));
+    #region ScrollViewer
 
-        if (!listBox.TryAttachSmoothScrolling())
+    public static void EnableSmoothScrolling(this ScrollViewer @this, bool enable = true)
+    {
+        const string __rKey_use_smooth_scrolling = "__USE_SMOOTH_SCROLLING";
+
+        @this.Resources[__rKey_use_smooth_scrolling] = enable;
+        @this.LayoutUpdated -= ScrollerViewOnLayoutUpdated_AttachSmoothView;
+        @this.LayoutUpdated += ScrollerViewOnLayoutUpdated_AttachSmoothView;
+
+        static void ScrollerViewOnLayoutUpdated_AttachSmoothView(object? sender, EventArgs e)
         {
-            Debug.WriteLine($"({typeof(ViewHelper).FullName}.{nameof(ListBox_LayoutUpdated)}) Cannot attach smooth scrolling to {listBox.GetType().Name}.");
+            if (sender is not ScrollViewer scrollViewer)
+                throw new ArgumentException(null, nameof(sender));
+            if (scrollViewer.TryGetResource(__rKey_use_smooth_scrolling, null, out var _v) && _v is bool use_smooth_scrolling)
+            {
+                var b = Interaction.GetBehaviors(scrollViewer);
+                if (use_smooth_scrolling)
+                {
+                    if (!b.Any(b => b is Xaml.Behaviors.Interactions.Animated.VerticalScrollViewerAnimatedBehavior))
+                        b.Add(new Xaml.Behaviors.Interactions.Animated.VerticalScrollViewerAnimatedBehavior());
+                }
+                else
+                    b.RemoveAll(b.Where(b => b is Xaml.Behaviors.Interactions.Animated.VerticalScrollViewerAnimatedBehavior));
+            }
         }
     }
 
-    // Clear selection when background is clicked
-    public static void ListBox_Tapped(object? sender, TappedEventArgs e)
+
+    #endregion
+
+    #region ListBox
+
+    /// <summary>
+    /// Clear selection when background is clicked
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    public static void ListBoxOnTapped_CancelSelection(object? sender, TappedEventArgs e)
     {
         if (sender is ListBox listBox)
         {
@@ -37,11 +62,60 @@ public static class ViewHelper
         }
     }
 
+    /// <summary>
+    /// Get the built-in ScrollViewer of ListBox
+    /// </summary>
+    /// <param name="this"></param>
+    /// <returns>Reference to ScrollViewer, null if not found</returns>
+    public static ScrollViewer? GetScrollViewer(this ListBox @this)
+    {
+        return @this.Find<ScrollViewer>("PART_ScrollViewer") ?? @this.FindDescendantOfType<ScrollViewer>();
+    }
+
+
+    public static void EnableSmoothScrolling(this ListBox @this, bool enable = true)
+    {
+        const string __rKey_use_smooth_scrolling = "__WANT_USING_SMOOTH_SCROLLING";
+        
+        @this.Resources[__rKey_use_smooth_scrolling] = enable;
+        @this.LayoutUpdated -= ListBoxOnLayoutUpdated_AttachSmoothView;
+        @this.LayoutUpdated += ListBoxOnLayoutUpdated_AttachSmoothView;
+
+        static void ListBoxOnLayoutUpdated_AttachSmoothView(object? sender, EventArgs e)
+        {
+            if (sender is not ListBox listBox)
+                throw new ArgumentException(null, nameof(sender));
+            var scrollViewer = listBox.GetScrollViewer();
+
+            if (scrollViewer?.TryGetResource(__rKey_use_smooth_scrolling, null, out var _v) is bool _exp && _exp is true && _v is bool use_smooth_scrolling)
+            {
+                var b = Interaction.GetBehaviors(scrollViewer);
+                if (use_smooth_scrolling)
+                {
+                    if (!b.Any(b => b is Xaml.Behaviors.Interactions.Animated.VerticalScrollViewerAnimatedBehavior))
+                        b.Add(new Xaml.Behaviors.Interactions.Animated.VerticalScrollViewerAnimatedBehavior());
+                }
+                else
+                    b.RemoveAll(b.Where(b => b is Xaml.Behaviors.Interactions.Animated.VerticalScrollViewerAnimatedBehavior));
+            }
+        }
+    }
+
+    #endregion
+
+
     public interface INavigationAnimatable
     {
         public bool OnNavigating(object? _ = null);
 
         public void OnNavigated(object? _ = null);
+    }
+
+    public interface IAsyncNavigationAnimatable
+    {
+        public Task<bool> OnNavigatingAsync(object? _ = null);
+
+        public Task OnNavigatedAsync(object? _ = null);
     }
 
     public class SlideAnimation
@@ -438,25 +512,5 @@ public class GentleAnimator
     public IEnumerable<string> GetRunningAnimations()
     {
         return _animationTokens.Keys;
-    }
-}
-
-public static class ListBoxHelpers
-{
-    public static ScrollViewer? TryGetScrollViewer(this ListBox @this)
-    {
-        return @this.Find<ScrollViewer>("PART_ScrollViewer") ?? @this.FindDescendantOfType<ScrollViewer>();
-    }
-
-    public static bool TryAttachSmoothScrolling(this ListBox @this)
-    {
-        var _view = @this.TryGetScrollViewer();
-        if (_view == null)
-            return false;
-
-        var b = Interaction.GetBehaviors(_view);
-        if (!b.Any(b => b is Xaml.Behaviors.Interactions.Animated.VerticalScrollViewerAnimatedBehavior))
-            b.Add(new Xaml.Behaviors.Interactions.Animated.VerticalScrollViewerAnimatedBehavior());
-        return true;
     }
 }
