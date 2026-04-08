@@ -76,7 +76,7 @@ public static class ViewHelper
     public static void EnableSmoothScrolling(this ListBox @this, bool enable = true)
     {
         const string __rKey_use_smooth_scrolling = "__WANT_USING_SMOOTH_SCROLLING";
-        
+
         @this.Resources[__rKey_use_smooth_scrolling] = enable;
         @this.LayoutUpdated -= ListBoxOnLayoutUpdated_AttachSmoothView;
         @this.LayoutUpdated += ListBoxOnLayoutUpdated_AttachSmoothView;
@@ -225,7 +225,7 @@ public static class ViewHelper
                         {
                             if (visual.RenderTransform is Transform _t)
                                 tGroup.Children.Add(_t);
-                            else _legacy_mode = true; //throw new NotImplementedException(); // slide in aniamtion skipped for the visual.
+                            else _legacy_mode = true; //throw new NotImplementedException(); // slide in aniamtion skipped for the animatable.
                         }
 
                         visual.RenderTransform = tGroup;
@@ -267,10 +267,10 @@ public static class ViewHelper
 
                     if (!_legacy_mode)
                     {
-                        // TODO: visual.Bounds may be empty
+                        // TODO: animatable.Bounds may be empty
                         if (validationParent is not null && visual is Control _control)
                             _control.Arrange(validationParent.Bounds);
-                        //if (visual is Control _control)
+                        //if (animatable is Control _control)
                         //    _control.Arrange(validationParent?.Bounds ?? new Rect(0, 0, 100000, 100000));
 
                         var a = act is ActType.In ? (visual.Bounds.Width * __AniamtionOffsetFrom) : __AniamtionOffsetTo;
@@ -326,6 +326,8 @@ public static class GentleAnimationExtensions
 {
     private const string AnimatorResourceKey = "__GentleAnimator";
 
+    #region Visual Extensions
+
     public static Task BeginAnimation(this Visual visual, Animation animation, string? animationKey)
     {
         ArgumentNullException.ThrowIfNull(visual);
@@ -334,16 +336,11 @@ public static class GentleAnimationExtensions
         // 获取或创建Animator实例
         var animator = GetOrCreateAnimator(visual);
 
-        return animator.BeginAnimation((Control)visual, animation, animationKey);
+        return animator.BeginAnimation(visual, animation, animationKey);
     }
     public static Task BeginAnimation(this Visual visual, Animation animation, params IEnumerable<AvaloniaProperty> properties)
         => BeginAnimation(visual, animation, string.Join('|', properties.Select(p => p.Name)));
 
-    /// <summary>
-    /// 停止指定属性的动画
-    /// </summary>
-    /// <param name="visual">目标控件</param>
-    /// <param name="property">属性</param>
     public static void StopAnimation(this Visual visual, AvaloniaProperty property)
     {
         ArgumentNullException.ThrowIfNull(visual);
@@ -356,11 +353,6 @@ public static class GentleAnimationExtensions
         }
     }
 
-    /// <summary>
-    /// 停止指定键的动画
-    /// </summary>
-    /// <param name="visual">目标控件</param>
-    /// <param name="animationKey">动画键</param>
     public static void StopAnimation(this Visual visual, string animationKey)
     {
         ArgumentNullException.ThrowIfNull(visual);
@@ -373,10 +365,6 @@ public static class GentleAnimationExtensions
         }
     }
 
-    /// <summary>
-    /// 停止所有动画
-    /// </summary>
-    /// <param name="visual">目标控件</param>
     public static void StopAllAnimations(this Visual visual)
     {
         ArgumentNullException.ThrowIfNull(visual);
@@ -388,12 +376,6 @@ public static class GentleAnimationExtensions
         }
     }
 
-    /// <summary>
-    /// 检查指定属性是否有正在运行的动画
-    /// </summary>
-    /// <param name="visual">目标控件</param>
-    /// <param name="property">属性</param>
-    /// <returns>是否有动画正在运行</returns>
     public static bool IsAnimating(this Visual visual, AvaloniaProperty property)
     {
         ArgumentNullException.ThrowIfNull(visual);
@@ -408,9 +390,6 @@ public static class GentleAnimationExtensions
         return false;
     }
 
-    /// <summary>
-    /// 获取或创建Animator实例
-    /// </summary>
     private static GentleAnimator GetOrCreateAnimator(Visual visual)
     {
         if (visual.Resources.TryGetResource(AnimatorResourceKey, null, out var resource) &&
@@ -443,13 +422,76 @@ public static class GentleAnimationExtensions
             }
         }
     }
+
+    #endregion // Visual Extensions
+
+    #region Animatable Extensions
+
+    public static Task BeginAnimation(this Animatable animatable, ref GentleAnimator? animator, Animation animation, string? animationKey)
+    {
+        ArgumentNullException.ThrowIfNull(animatable);
+        ArgumentNullException.ThrowIfNull(animation);
+
+        animator ??= new();
+
+        return animator.BeginAnimation(animatable, animation, animationKey);
+    }
+    public static Task BeginAnimaiton(this Animatable animatable, ref GentleAnimator? animator, Animation animation, params IEnumerable<AvaloniaProperty> properties)
+        => BeginAnimation(animatable, ref animator, animation, string.Join('|', properties.Select(p => p.Name)));
+
+    public static Task PostAnimation(this Animatable animatable, Animation animation, string? animationKey)
+    {
+        ArgumentNullException.ThrowIfNull(animatable);
+        ArgumentNullException.ThrowIfNull(animation);
+
+        return new GentleAnimator().BeginAnimation(animatable, animation, animationKey);
+    }
+    public static Task PostAnimation(this Animatable animatable, Animation animation, params IEnumerable<AvaloniaProperty> properties)
+        => PostAnimation(animatable, animation, string.Join('|', properties.Select(p => p.Name)));
+
+    public static void StopAnimation(this Animatable animatable, in GentleAnimator animator, AvaloniaProperty property)
+    {
+        ArgumentNullException.ThrowIfNull(animatable);
+        ArgumentNullException.ThrowIfNull(animator);
+        ArgumentNullException.ThrowIfNull(property);
+
+        animator.StopAnimation(property.Name);
+    }
+
+    public static void StopAnimation(this Animatable animatable, in GentleAnimator animator, string animationKey)
+    {
+        ArgumentNullException.ThrowIfNull(animatable);
+        ArgumentNullException.ThrowIfNull(animator);
+        if (string.IsNullOrEmpty(animationKey)) throw new ArgumentNullException(nameof(animationKey));
+
+        animator.StopAnimation(animationKey);
+    }
+
+    public static void StopAllAnimations(this Animatable animatable, in GentleAnimator animator)
+    {
+        ArgumentNullException.ThrowIfNull(animatable);
+        ArgumentNullException.ThrowIfNull(animator);
+
+        animator.StopAllAnimations();
+    }
+
+    public static bool IsAnimating(this Animatable animatable, in GentleAnimator animator, AvaloniaProperty property)
+    {
+        ArgumentNullException.ThrowIfNull(animatable);
+        ArgumentNullException.ThrowIfNull(animator);
+        ArgumentNullException.ThrowIfNull(property);
+
+        return animator.IsAnimating(property.Name);
+    }
+
+    #endregion // Animatable Extensions
 }
 
 public class GentleAnimator
 {
     private readonly Dictionary<string, CancellationTokenSource> _animationTokens = [];
 
-    public async Task BeginAnimation(Control control, Animation animation, string? animationKeySuffix = null)
+    public async Task BeginAnimation(Animatable control, Animation animation, string? animationKeySuffix = null)
     {
         // 使用属性名作为默认key，或者使用自定义key
         var key = animationKeySuffix ?? $"{control.GetHashCode()}_{animationKeySuffix ?? "Unknown"}";
@@ -483,7 +525,7 @@ public class GentleAnimator
         }
     }
 
-    public async Task BeginAnimation(Control control, Animation animation, params IEnumerable<AvaloniaProperty> properties)
+    public async Task BeginAnimation(Animatable control, Animation animation, params IEnumerable<AvaloniaProperty> properties)
         => await BeginAnimation(control, animation, string.Join('|', properties.Select(p => p.Name)));
 
     public void StopAnimation(string animationKey)
