@@ -427,7 +427,7 @@ public static class GentleAnimationExtensions
 
     #region Animatable Extensions
 
-    public static Task BeginAnimation(this Animatable animatable, ref GentleAnimator? animator, Animation animation, string? animationKey)
+    public static Task BeginAAnimation(this Animatable animatable, ref GentleAnimator? animator, Animation animation, string? animationKey)
     {
         ArgumentNullException.ThrowIfNull(animatable);
         ArgumentNullException.ThrowIfNull(animation);
@@ -436,20 +436,20 @@ public static class GentleAnimationExtensions
 
         return animator.BeginAnimation(animatable, animation, animationKey);
     }
-    public static Task BeginAnimaiton(this Animatable animatable, ref GentleAnimator? animator, Animation animation, params IEnumerable<AvaloniaProperty> properties)
-        => BeginAnimation(animatable, ref animator, animation, string.Join('|', properties.Select(p => p.Name)));
+    public static Task BeginAAnimaiton(this Animatable animatable, ref GentleAnimator? animator, Animation animation, params IEnumerable<AvaloniaProperty> properties)
+        => BeginAAnimation(animatable, ref animator, animation, string.Join('|', properties.Select(p => p.Name)));
 
-    public static Task PostAnimation(this Animatable animatable, Animation animation, string? animationKey)
+    public static Task PostAAnimation(this Animatable animatable, Animation animation, string? animationKey)
     {
         ArgumentNullException.ThrowIfNull(animatable);
         ArgumentNullException.ThrowIfNull(animation);
 
         return new GentleAnimator().BeginAnimation(animatable, animation, animationKey);
     }
-    public static Task PostAnimation(this Animatable animatable, Animation animation, params IEnumerable<AvaloniaProperty> properties)
-        => PostAnimation(animatable, animation, string.Join('|', properties.Select(p => p.Name)));
+    public static Task PostAAnimation(this Animatable animatable, Animation animation, params IEnumerable<AvaloniaProperty> properties)
+        => PostAAnimation(animatable, animation, string.Join('|', properties.Select(p => p.Name)));
 
-    public static void StopAnimation(this Animatable animatable, in GentleAnimator animator, AvaloniaProperty property)
+    public static void StopAAnimation(this Animatable animatable, in GentleAnimator animator, AvaloniaProperty property)
     {
         ArgumentNullException.ThrowIfNull(animatable);
         ArgumentNullException.ThrowIfNull(animator);
@@ -458,7 +458,7 @@ public static class GentleAnimationExtensions
         animator.StopAnimation(property.Name);
     }
 
-    public static void StopAnimation(this Animatable animatable, in GentleAnimator animator, string animationKey)
+    public static void StopAAnimation(this Animatable animatable, in GentleAnimator animator, string animationKey)
     {
         ArgumentNullException.ThrowIfNull(animatable);
         ArgumentNullException.ThrowIfNull(animator);
@@ -467,7 +467,7 @@ public static class GentleAnimationExtensions
         animator.StopAnimation(animationKey);
     }
 
-    public static void StopAllAnimations(this Animatable animatable, in GentleAnimator animator)
+    public static void StopAllAAnimations(this Animatable animatable, in GentleAnimator animator)
     {
         ArgumentNullException.ThrowIfNull(animatable);
         ArgumentNullException.ThrowIfNull(animator);
@@ -475,7 +475,7 @@ public static class GentleAnimationExtensions
         animator.StopAllAnimations();
     }
 
-    public static bool IsAnimating(this Animatable animatable, in GentleAnimator animator, AvaloniaProperty property)
+    public static bool IsAAnimating(this Animatable animatable, in GentleAnimator animator, AvaloniaProperty property)
     {
         ArgumentNullException.ThrowIfNull(animatable);
         ArgumentNullException.ThrowIfNull(animator);
