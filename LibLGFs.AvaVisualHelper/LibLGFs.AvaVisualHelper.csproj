@@ -16,6 +16,9 @@
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Version>1.2.4</Version>
+    <BaseOutputPath>build\bin</BaseOutputPath>
+    <IntermediateOutputPath>build\obj</IntermediateOutputPath>
+    <PackageOutputPath>build\packages</PackageOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
